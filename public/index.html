@@ -1,0 +1,259 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>售前工程师 SOP 工作台</title>
+    <link rel="stylesheet" href="/styles.css?v=20260806-streaming">
+  </head>
+  <body>
+    <div id="homeView" class="home-view">
+      <header class="home-header">
+        <div>
+          <p class="eyebrow">售前工程师工作台</p>
+          <h1>售前工程师 SOP 工作台</h1>
+          <p class="home-subtitle">按标准流程完成客户交流、需求推进和售前判断。当前仅启用客户交流会议。</p>
+        </div>
+        <div class="home-meta">
+          <span>本地模型代理</span>
+          <strong>单场景试用</strong>
+        </div>
+      </header>
+
+      <main class="home-main">
+        <section class="scene-overview" aria-label="当前可用能力">
+          <div class="overview-item"><span class="overview-label">已启用</span><strong>1 个场景</strong></div>
+        </section>
+
+        <section class="scene-section" aria-label="售前 SOP 场景">
+          <div class="section-heading">
+            <div>
+              <h2>售前 SOP 场景</h2>
+              <p>选择可用场景进入工作台；进入客户交流会议后，可按学习或实际工作需要选择对应助手。</p>
+            </div>
+          </div>
+          <div class="scene-grid" id="sceneCards"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="meeting-entry-dialog" id="meetingEntryDialog">
+      <article class="meeting-entry-card">
+        <div class="dialog-head">
+          <div>
+            <h2>客户交流会议</h2>
+            <p>请选择当前要使用的助手。</p>
+          </div>
+          <button class="icon-button" id="closeMeetingEntry" type="button" aria-label="关闭客户交流会议选择">×</button>
+        </div>
+        <div class="meeting-entry-options">
+          <button class="meeting-entry-option" id="openSopLearning" type="button">
+            <strong>SOP 学习与问答</strong>
+            <span>平时学习 A/B/C 会议规范，复盘会前准备、会中追问和会后判断。</span>
+          </button>
+          <button class="meeting-entry-option" id="openMeetingExecution" type="button">
+            <strong>会议执行助手</strong>
+            <span>实际工作中完成会前准备、会中记录和会后纪要、跟进计划。</span>
+          </button>
+        </div>
+      </article>
+    </dialog>
+
+    <div id="executionView" class="execution-view hidden">
+      <header class="execution-topbar">
+        <button class="back-button" id="executionBackButton" type="button">返回场景首页</button>
+        <div>
+          <h1>会议执行助手</h1>
+          <p>按会前、会中、会后完成一次客户交流</p>
+        </div>
+        <div class="execution-topbar-actions"><div id="executionModelHealthSlot" class="model-health-slot" aria-label="模型服务检查"></div><span class="execution-stage" id="executionStageLabel">会前</span></div>
+      </header>
+
+      <nav class="execution-step-nav" id="executionStepNav" aria-label="会议执行步骤">
+        <button type="button" data-stage="before" class="active"><strong>1</strong>会前作战卡</button>
+        <button type="button" data-stage="during"><strong>2</strong>会中动态清单</button>
+        <button type="button" data-stage="after"><strong>3</strong>会后执行</button>
+      </nav>
+
+      <main class="execution-flow">
+        <section class="execution-step-panel" id="beforeExecutionStage" aria-label="会前作战卡">
+          <div class="execution-section-head"><div><span class="step-index">1</span><h2>会前作战卡</h2></div><span>先选类型，再用少量信息快速准备</span></div>
+          <div class="type-segments" id="executionMeetingTypes">
+            <button type="button" data-type="A"><strong>A</strong><span>初步交流</span></button>
+            <button type="button" data-type="B"><strong>B</strong><span>意向交流</span></button>
+            <button type="button" data-type="C"><strong>C</strong><span>方案汇报</span></button>
+          </div>
+          <div class="execution-basics">
+            <label>客户名称<input id="executionCustomerName" placeholder="客户单位名称，可填写待确认"></label>
+            <label>会议背景/主题<textarea id="executionMeetingBackground" rows="2" placeholder="例如：客户希望了解设备智能运维场景"></textarea></label>
+          </div>
+          <div class="execution-quick-fields" id="executionQuickFields"></div>
+          <div class="execution-actions"><button id="generateBattleCardButton" type="button">生成作战卡</button></div>
+          <section class="battle-card hidden" id="battleCard" aria-label="会议作战卡"></section>
+        </section>
+
+        <section class="execution-step-panel hidden" id="duringExecutionStage" aria-label="会中动态清单">
+          <div class="execution-section-head"><div><span class="step-index">2</span><h2>会中动态清单</h2></div><span id="duringProgress">请选择会议类型</span></div>
+          <div class="during-summary" id="duringSummary"></div>
+          <div class="live-grid">
+            <section class="live-section"><h3>优先追问</h3><div id="liveQuestions" class="quick-question-list"></div></section>
+            <section class="live-section"><h3>关键项</h3><div id="liveKeyItems" class="live-key-items"></div></section>
+          </div>
+          <section class="live-section live-record-section"><h3>快速记录</h3><div id="liveRecordTypes" class="record-type-list"></div><textarea id="liveRecordText" rows="2" placeholder="记录客户原话、顾虑、条件或下一步；没有对应类型时选择其他记录"></textarea><div class="live-record-actions"><label><input id="liveRecordConfirmed" type="checkbox" checked> 已确认</label><button id="addLiveRecordButton" type="button">添加记录</button></div><div id="liveRecordList" class="live-record-list"></div></section>
+          <div class="execution-actions"><button id="goToAfterButton" type="button">进入会后执行</button></div>
+        </section>
+
+        <section class="hidden" id="afterExecutionStage" aria-label="会后执行">
+        <div class="execution-shell">
+        <section class="execution-input" aria-label="会议资料输入">
+          <div class="execution-section-head">
+            <div><span class="step-index">1</span><h2>输入会议资料</h2></div>
+            <span id="executionSourceState">等待资料</span>
+          </div>
+          <textarea id="executionSource" rows="10" placeholder="粘贴会议纪要、转写文字或客户沟通内容"></textarea>
+          <div class="execution-input-actions">
+            <label class="file-action" for="executionFileInput">上传 MD / Word</label>
+            <input id="executionFileInput" type="file" accept=".md,.markdown,.docx" hidden>
+            <span id="executionFileName"></span>
+            <button id="extractMeetingButton" type="button">解析资料</button>
+          </div>
+        </section>
+
+        <section class="execution-context" aria-label="会议上下文">
+          <div class="execution-section-head">
+            <div><span class="step-index">2</span><h2>确认会议类型</h2></div>
+            <span id="meetingTypeSource">待识别</span>
+          </div>
+          <div class="type-segments" id="afterMeetingTypes"></div>
+        </section>
+
+        <section class="fact-workspace" aria-label="事实确认工作区">
+          <div class="execution-section-head">
+            <div><span class="step-index">3</span><h2>确认提取结果</h2></div>
+            <div class="fact-summary" id="factSummary">尚未解析</div>
+          </div>
+          <div class="fact-empty" id="factEmpty">解析后，候选事实和原文证据会显示在这里。</div>
+          <div class="fact-list" id="factList"></div>
+        </section>
+
+        <aside class="output-panel" aria-label="输出结果">
+          <div class="execution-section-head">
+            <div><span class="step-index">4</span><h2>生成正式材料</h2></div>
+          </div>
+          <div class="gap-summary" id="gapSummary">确认事实后检查缺项</div>
+          <button id="generateDocumentsButton" type="button" disabled>生成纪要与跟进计划</button>
+          <div class="document-tabs hidden" id="documentTabs">
+            <button type="button" data-document="minutes" class="active">会议纪要</button>
+            <button type="button" data-document="followUp">跟进计划</button>
+          </div>
+          <textarea id="documentPreview" class="document-preview hidden" aria-label="文档预览"></textarea>
+          <div class="output-actions hidden" id="outputActions">
+            <button id="downloadMarkdownButton" type="button">导出 Markdown</button>
+            <button id="downloadWordButton" type="button">导出 Word</button>
+          </div>
+        </aside>
+        </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="sceneView" class="scene-view hidden">
+      <header class="topbar">
+        <button class="back-button" id="backHomeButton" type="button">返回场景首页</button>
+        <div class="topbar-title">
+          <h1 id="sceneTitle">客户交流会议</h1>
+          <p id="scenePurpose">帮助售前人员在客户技术交流中不漏项、有追问、有边界、有下一步判断。</p>
+        </div>
+        <div class="topbar-actions">
+          <div id="modelHealthSlot" class="model-health-slot" aria-label="模型服务检查"></div>
+        </div>
+      </header>
+
+      <main class="app-shell hierarchy-shell">
+        <section class="workspace hierarchy-workspace" aria-label="客户交流会议 SOP 工作区">
+          <section class="sop-flow-panel" aria-label="SOP 阶段流程">
+            <div class="section-heading compact">
+              <div>
+              <h2>会议任务助手</h2>
+                <p>直接输入会议需求、客户原话或会议纪要；系统会判断任务并按对应 SOP 输出。</p>
+              </div>
+            </div>
+            <div class="meeting-type-bar" id="meetingTypeBar" aria-label="当前交流类型"></div>
+            <div class="sop-flow" aria-label="会前会中会后 SOP 阶段" id="sopList"></div>
+          </section>
+
+          <dialog class="intake-dialog" id="intakeDialog">
+            <article class="intake-card">
+              <div class="dialog-head">
+                <h2>选择客户交流类型</h2>
+              </div>
+              <p class="intake-copy">必须先选择 A/B/C 类型，并补充必填客户信息；不清楚时可填写“待确认”。</p>
+              <div class="intake-type-grid" id="intakeMeetingTypes"></div>
+              <p class="intake-error hidden" id="intakeError" role="alert"></p>
+              <div class="intake-fields" id="intakeFields"></div>
+              <div class="dialog-actions">
+                <button type="button" id="submitIntake">进入工作台</button>
+              </div>
+            </article>
+          </dialog>
+
+          <dialog class="node-detail-dialog" id="nodeDetailDialog">
+            <article class="node-detail-card" id="nodeDetailContent"></article>
+          </dialog>
+
+          <dialog class="customer-sync-dialog" id="customerSyncDialog">
+            <article class="customer-sync-card">
+              <div class="dialog-head">
+                <div>
+                  <h2>识别到客户信息</h2>
+                  <p>确认后同步到当前交流类型的客户信息字段；不确认也可以直接生成。</p>
+                </div>
+                <button class="icon-button" type="button" id="closeCustomerSync" aria-label="关闭客户信息同步">×</button>
+              </div>
+              <div class="customer-sync-fields" id="customerSyncFields"></div>
+              <div class="dialog-actions">
+                <button type="button" id="confirmCustomerSync">确认同步并继续生成</button>
+                <button type="button" id="skipCustomerSync">仅生成，不同步</button>
+              </div>
+            </article>
+          </dialog>
+        </section>
+
+        <aside class="assistant-panel" aria-label="AI 助手">
+          <section class="step-confirmation" id="stepConfirmation" aria-label="确认 SOP 步骤"></section>
+          <div class="context-strip" id="contextStrip"></div>
+          <section class="conversation-suggestions" id="conversationSuggestions" aria-label="推荐问题"></section>
+          <section class="chat-log" id="chatLog" aria-live="polite"></section>
+          <section class="worksheet hidden" id="worksheet"></section>
+          <form class="composer" id="composer">
+            <div class="composer-context" id="composerContext">请选择交流类型和 SOP 节点</div>
+            <div class="composer-input-shell">
+              <button type="button" class="composer-attach" id="attachButton" aria-label="上传文档" title="上传文档">+</button>
+              <input id="attachmentInput" type="file" accept=".md,.markdown,.docx" class="hidden-file-input" aria-hidden="true" tabindex="-1">
+              <div class="composer-attachment-chip hidden" id="attachmentChip">
+                <span class="composer-attachment-name" id="attachmentName"></span>
+                <button type="button" class="composer-attachment-remove" id="removeAttachmentButton" aria-label="移除附件">×</button>
+              </div>
+              <textarea id="userInput" rows="1" placeholder="输入客户背景、客户原话、会议纪要，或选择推荐问题"></textarea>
+              <button type="submit" id="sendButton" aria-label="生成">生成</button>
+            </div>
+          </form>
+        </aside>
+      </main>
+
+      <dialog class="question-more-dialog" id="questionMoreDialog">
+        <article class="question-more-card">
+          <div class="dialog-head">
+            <h2>更多相关问题</h2>
+            <button class="icon-button" type="button" id="closeQuestionMore" aria-label="关闭更多问题">×</button>
+          </div>
+          <div class="more-question-list" id="moreQuestionList"></div>
+        </article>
+      </dialog>
+    </div>
+
+    <script type="module" src="/app.js?v=20260806-streaming"></script>
+    <script type="module" src="/execution.js?v=20260806-streaming"></script>
+  </body>
+</html>
+

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>作品集本机内容管理</title>
+  <link rel="stylesheet" href="/portfolio.css">
+  <script type="module" src="/portfolio-admin.js"></script>
+</head>
+<body class="portfolio-admin">
+  <header class="site-header">
+    <a class="wordmark" href="/portfolio.html">作品集 / 管理</a>
+    <p class="admin-local-note">仅供本机内容维护使用</p>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-intro" aria-labelledby="adminTitle">
+      <p class="eyebrow">Local content management</p>
+      <h1 id="adminTitle">作品集内容管理</h1>
+      <p>此页面不会出现在公开作品集导航中。上传前会在本机预览媒体文件，不会产生网络上传。</p>
+    </section>
+
+    <p id="adminStatus" class="status-message" role="status" aria-live="polite"></p>
+
+    <div class="admin-layout">
+      <aside class="admin-projects" aria-labelledby="adminProjectsTitle">
+        <div class="admin-panel-heading">
+          <h2 id="adminProjectsTitle">已有案例</h2>
+          <button id="newProjectButton" type="button">新建案例</button>
+        </div>
+        <div id="adminProjectList" class="admin-project-list" aria-live="polite"></div>
+        <div class="admin-panel-heading">
+          <h2 id="adminMediaLibraryTitle">媒体库</h2>
+        </div>
+        <p>这里保留全部已管理文件。只有未被案例引用的文件可以删除。</p>
+        <div id="adminMediaLibrary" class="admin-project-list" aria-labelledby="adminMediaLibraryTitle" aria-live="polite"></div>
+      </aside>
+
+      <section class="admin-editor" aria-labelledby="editorTitle">
+        <div class="admin-panel-heading">
+          <h2 id="editorTitle">案例编辑</h2>
+          <div class="preview-mode-controls" aria-label="预览模式">
+            <button type="button" data-preview-mode="desktop" aria-pressed="true">桌面预览</button>
+            <button type="button" data-preview-mode="mobile" aria-pressed="false">移动预览</button>
+          </div>
+        </div>
+
+        <form id="projectForm" novalidate>
+          <div class="admin-form-grid">
+            <label>案例 ID
+              <input name="projectId" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="120" autocomplete="off">
+            </label>
+            <label>状态
+              <select name="status" required>
+                <option value="draft">草稿</option>
+                <option value="published">发布</option>
+                <option value="coming_soon">即将发布</option>
+                <option value="archived">已下架</option>
+              </select>
+            </label>
+            <label class="admin-wide">标题
+              <input name="title" required maxlength="120">
+            </label>
+            <label class="admin-wide">摘要
+              <textarea name="summary" required maxlength="500" rows="3"></textarea>
+            </label>
+            <label>角色
+              <input name="role" required maxlength="160">
+            </label>
+            <label>年份
+              <input name="year" required maxlength="20" inputmode="numeric">
+            </label>
+            <label class="admin-wide">业务价值
+              <textarea name="value" required maxlength="500" rows="3"></textarea>
+            </label>
+            <label class="admin-wide">挑战
+              <textarea name="challenge" required maxlength="500" rows="3"></textarea>
+            </label>
+            <label class="admin-wide">交付说明
+              <textarea name="delivery" required maxlength="500" rows="3"></textarea>
+            </label>
+          </div>
+
+          <fieldset class="solution-fieldset">
+            <legend>解决方案步骤（1–6 条）</legend>
+            <div id="solutionSteps"></div>
+            <button id="addSolutionStep" type="button">添加步骤</button>
+          </fieldset>
+
+          <fieldset class="media-fieldset">
+            <legend>媒体文件</legend>
+            <p>支持 JPEG、PNG、WebP（单个不超过 20MB）与 MP4（单个不超过 500MB）。</p>
+            <p>上传视频时会优先使用同一案例中的图片作为封面；没有图片时使用本机默认封面。</p>
+            <label>选择媒体
+              <input id="mediaInput" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple>
+            </label>
+            <div id="selectedMedia" class="selected-media" aria-live="polite"></div>
+            <div id="existingMedia" class="existing-media" aria-live="polite"></div>
+          </fieldset>
+
+          <div class="admin-actions">
+            <button type="submit">发布或保存</button>
+            <button id="resetProjectButton" type="reset">清空编辑</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="admin-preview" aria-labelledby="previewTitle">
+        <h2 id="previewTitle">案例预览</h2>
+        <article id="livePreview" class="live-preview" data-mode="desktop"></article>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="deleteMediaDialog" aria-labelledby="deleteMediaTitle">
+    <h2 id="deleteMediaTitle">确认删除媒体</h2>
+    <p id="deleteMediaMessage">删除后无法恢复。仍被案例引用的媒体不会被删除。</p>
+    <form method="dialog" class="dialog-actions">
+      <button value="cancel">取消</button>
+      <button id="confirmDeleteMedia" value="confirm" type="submit">确认删除</button>
+    </form>
+  </dialog>
+</body>
+</html>

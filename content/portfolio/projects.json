@@ -1,0 +1,60 @@
+[
+  {
+    "id": "presales-customer-communication-agent",
+    "status": "published",
+    "title": "售前客户沟通智能体",
+    "summary": "把售前客户交流前、中、后的准备与交付串为本机可演示的工作流。",
+    "role": "产品设计与工程实现",
+    "year": "2026",
+    "value": "让客户信息、作战卡和会后动作从分散经验变成结构化支持。",
+    "challenge": "售前准备依赖个人经验，信息分散，会议上下文难以连续沉淀。",
+    "delivery": "本机演示与可配置 SOP。",
+    "solutionSteps": [
+      "会前作战卡",
+      "会中动态清单",
+      "会后结构化交付"
+    ],
+    "media": [
+      {
+        "id": "presales-agent-demo",
+        "fileName": "presales-agent-demo.mp4",
+        "url": "/presales-agent-demo.mp4",
+        "mimeType": "video/mp4",
+        "kind": "video",
+        "alt": "售前客户沟通智能体本机演示视频",
+        "caption": "展示会前作战卡、会中动态清单与会后结构化交付流程。",
+        "posterUrl": "/portfolio-video-poster.svg"
+      }
+    ]
+  },
+  {
+    "id": "portfolio-coming-soon-one",
+    "status": "coming_soon",
+    "title": "行业知识工作台",
+    "summary": "正在整理案例材料。",
+    "role": "产品设计与工程实现",
+    "year": "2026",
+    "value": "待发布。",
+    "challenge": "待发布。",
+    "delivery": "即将发布。",
+    "solutionSteps": [
+      "案例整理"
+    ],
+    "media": []
+  },
+  {
+    "id": "portfolio-coming-soon-two",
+    "status": "coming_soon",
+    "title": "客户方案协作助手",
+    "summary": "正在整理案例材料。",
+    "role": "产品设计与工程实现",
+    "year": "2026",
+    "value": "待发布。",
+    "challenge": "待发布。",
+    "delivery": "即将发布。",
+    "solutionSteps": [
+      "案例整理"
+    ],
+    "media": []
+  }
+]

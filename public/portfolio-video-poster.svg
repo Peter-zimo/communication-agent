@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-labelledby="title description">
+  <title id="title">售前客户沟通智能体演示</title>
+  <desc id="description">暖米白背景上的深色演示标题与铜红播放标记。</desc>
+  <rect width="1280" height="720" fill="#f4f0e8"/>
+  <path d="M96 96h1088v528H96z" fill="none" stroke="#161513" stroke-width="4"/>
+  <circle cx="640" cy="330" r="82" fill="#9b4b36"/>
+  <path d="m620 282 76 48-76 48z" fill="#f4f0e8"/>
+  <text x="640" y="500" fill="#161513" font-family="system-ui, sans-serif" font-size="48" text-anchor="middle">售前客户沟通智能体</text>
+  <text x="640" y="556" fill="#5f5a52" font-family="system-ui, sans-serif" font-size="28" text-anchor="middle">本机演示视频</text>
+</svg>

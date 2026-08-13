@@ -1,0 +1,15 @@
+{
+  "name": "customer-communication-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --watch src/server.js",
+    "start:once": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "mammoth": "^1.12.0"
+  }
+}

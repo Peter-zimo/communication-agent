@@ -1,0 +1,8 @@
+node_modules/
+.superpowers/
+.env
+.env.*
+!.env.example
+coverage/
+*.log
+portfolio-data/
