@@ -21,6 +21,61 @@ const state = {
   battleCardTimer: null
 };
 
+// 进度保存配置
+const STORAGE_KEY = 'presales_execution_state';
+const STORAGE_EXPIRY_HOURS = 24;
+
+// 保存状态到本地存储
+function saveState() {
+  try {
+    const saveData = {
+      meetingType: state.meetingType,
+      session: state.session,
+      stage: state.stage,
+      battleCardDraft: state.battleCardDraft,
+      selectedRecordType: state.selectedRecordType,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+  } catch (error) {
+    console.warn('状态保存失败:', error);
+  }
+}
+
+// 从本地存储恢复状态
+function restoreState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+
+    const saveData = JSON.parse(saved);
+    const hoursSinceSave = (Date.now() - saveData.timestamp) / (1000 * 60 * 60);
+
+    // 超过24小时不恢复
+    if (hoursSinceSave > STORAGE_EXPIRY_HOURS) {
+      localStorage.removeItem(STORAGE_KEY);
+      return false;
+    }
+
+    // 恢复状态
+    if (saveData.meetingType) state.meetingType = saveData.meetingType;
+    if (saveData.session) state.session = { ...state.session, ...saveData.session };
+    if (saveData.stage) state.stage = saveData.stage;
+    if (saveData.battleCardDraft) state.battleCardDraft = saveData.battleCardDraft;
+    if (saveData.selectedRecordType) state.selectedRecordType = saveData.selectedRecordType;
+
+    return true;
+  } catch (error) {
+    console.warn('状态恢复失败:', error);
+    return false;
+  }
+}
+
+// 清除保存的状态
+function clearSavedState() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 const els = {
   view: document.querySelector('#executionView'),
   back: document.querySelector('#executionBackButton'),
@@ -74,6 +129,13 @@ async function init() {
   if (!response.ok) throw new Error('会议执行配置加载失败。');
   const payload = await response.json();
   state.config = payload.executionConfig;
+
+  // 尝试恢复之前保存的状态
+  const restored = restoreState();
+  if (restored) {
+    console.log('已恢复上次的工作进度');
+  }
+
   createModelHealthControls();
   bindEvents();
   renderAll();
@@ -215,6 +277,7 @@ function selectMeetingType(type) {
   resetBattleCardDraft();
   stopBattleCardOptimization({ keepResult: false });
   renderAll();
+  saveState(); // 自动保存进度
 }
 
 function typeConfig() { return state.config?.byMeetingType?.[state.meetingType]; }
@@ -516,6 +579,7 @@ function touchBattleCardDraft() {
     state.battleCardProposal.status = 'stale';
   }
   renderBattleCard();
+  saveState(); // 自动保存进度
 }
 
 function battleCardStatusText(optimization) {
@@ -560,14 +624,43 @@ function renderRecordTypes() {
 function addLiveRecord() {
   const text = els.recordText.value.trim();
   if (!text) return;
-  const type = (state.config?.recordTypes || []).find((item) => item.id === state.selectedRecordType) || { id: 'other', label: '其他记录' };
-  state.session.records.push({ id: `${Date.now()}-${Math.random()}`, type: type.id, label: type.label, text, status: els.recordConfirmed.checked ? 'confirmed' : 'questionable' });
+
+  // 智能推断记录类型
+  const suggestedTypeId = inferRecordType(text);
+  const type = (state.config?.recordTypes || []).find((item) => item.id === suggestedTypeId)
+    || (state.config?.recordTypes || []).find((item) => item.id === state.selectedRecordType)
+    || { id: 'other', label: '其他记录' };
+
+  state.session.records.push({
+    id: `${Date.now()}-${Math.random()}`,
+    type: type.id,
+    label: type.label,
+    text,
+    status: els.recordConfirmed.checked ? 'confirmed' : 'questionable',
+    timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  });
   els.recordText.value = '';
   renderDuring();
+  saveState(); // 自动保存进度
+
+  // 显示记录成功提示
+  const totalCount = state.session.records.length;
+  setInputMessage(`已记录「${type.label}」，共 ${totalCount} 条记录`);
+}
+
+// 智能推断记录类型
+function inferRecordType(text) {
+  const lowerText = text.toLowerCase();
+  if (/客户说|原话|提到/.test(lowerText)) return 'quote';
+  if (/担心|顾虑|顾虑|风险|问题/.test(lowerText)) return 'concern';
+  if (/需要|要求|希望|想要/.test(lowerText)) return 'requirement';
+  if (/同意|认可|确定|没问题/.test(lowerText)) return 'agreement';
+  if (/计划|下一步|后续|跟进/.test(lowerText)) return 'action';
+  return state.selectedRecordType || 'other';
 }
 
 function renderRecordList() {
-  els.recordList.innerHTML = state.session.records.length ? state.session.records.map((record) => `<article data-record-id="${record.id}"><div><span class="record-status ${record.status}">${record.status === 'confirmed' ? '已确认' : '待核实'}</span><strong>${escapeHtml(record.label)}</strong></div><p>${escapeHtml(record.text)}</p><button type="button" data-record-action="toggle">切换状态</button><button type="button" data-record-action="remove">删除</button></article>`).join('') : '<p class="execution-empty">尚无记录。用一句话记录即可，之后可随时修改状态。</p>';
+  els.recordList.innerHTML = state.session.records.length ? state.session.records.map((record) => `<article data-record-id="${record.id}"><div class="record-header"><span class="record-status ${record.status}">${record.status === 'confirmed' ? '已确认' : '待核实'}</span><strong>${escapeHtml(record.label)}</strong>${record.timestamp ? `<span class="record-time">${escapeHtml(record.timestamp)}</span>` : ''}</div><p>${escapeHtml(record.text)}</p><div class="record-actions"><button type="button" data-record-action="toggle">切换状态</button><button type="button" data-record-action="remove">删除</button></div></article>`).join('') : '<p class="execution-empty">尚无记录。用一句话记录即可，之后可随时修改状态。</p>';
 }
 
 function handleRecordAction(event) {
@@ -579,6 +672,7 @@ function handleRecordAction(event) {
   if (action.dataset.recordAction === 'remove') state.session.records.splice(index, 1);
   else state.session.records[index].status = state.session.records[index].status === 'confirmed' ? 'questionable' : 'confirmed';
   renderDuring();
+  saveState(); // 自动保存进度
 }
 
 function prepareAfterMeeting() {

@@ -364,23 +364,105 @@ function parseWorksheetExtraction(answer) {
 function buildBattleCardOptimizationMessages(meetingType, session = {}, battleCard = {}) {
   const beforeNodes = meetingType.sopNodes.filter((node) => node.stage === 'before_meeting');
   const guardrails = beforeNodes.flatMap((node) => node.guardrails || []);
+
+  // 分析客户信息，提取关键上下文
+  const customerAnalysis = analyzeCustomerContext(session);
+
   return [
     {
       role: 'system',
-      content: '你是售前会议会前准备助手。只能根据用户提供的信息和 SOP 生成简洁建议；不能把未知信息写成事实，不能承诺价格、周期、效果或交付范围。'
+      content: [
+        '你是售前会议会前准备助手。根据客户信息和 SOP 生成个性化、可操作的建议。',
+        '规则：',
+        '1. 只能根据用户提供的信息和 SOP 生成建议',
+        '2. 不能把未知信息写成事实',
+        '3. 不能承诺价格、周期、效果或交付范围',
+        '4. 建议必须具体、可操作，避免泛泛而谈',
+        '5. 优先问题要针对客户关注方向设计'
+      ].join('\n')
     },
     {
       role: 'user',
       content: [
+        `【会议信息】`,
         `会议类型：${meetingType.id} 类 ${meetingType.name}`,
-        `客户与会议输入：${JSON.stringify(session)}`,
-        `当前可优化作战卡：${JSON.stringify(battleCard)}`,
-        `会前 SOP 必做项：${beforeNodes.flatMap((node) => node.mustDo || []).join('；')}`,
-        `边界：${guardrails.join('；')}`,
-        '只输出 JSON，不要 Markdown、解释或其他字段：{"meetingGoal":"不超过180字的会议目标","priorityQuestions":["1-5条优先追问"],"materials":["1-8项建议材料"],"riskReminders":["1-5条补充风险提醒"]}。只能根据已提供信息提出建议；未知信息必须体现为待确认事项，不能删除或改写 SOP 必做项和边界。'
+        `客户名称：${session.customerName || '待确认'}`,
+        `会议背景：${session.background || '待确认'}`,
+        ``,
+        `【客户画像分析】`,
+        customerAnalysis,
+        ``,
+        `【当前作战卡】`,
+        JSON.stringify(battleCard, null, 2),
+        ``,
+        `【SOP 必做项】`,
+        beforeNodes.flatMap((node) => node.mustDo || []).join('；'),
+        ``,
+        `【边界约束】`,
+        guardrails.join('；'),
+        ``,
+        `【输出要求】`,
+        '只输出 JSON，不要 Markdown、解释或其他字段：',
+        '{',
+        '  "meetingGoal": "不超过120字的会议目标，要体现客户关注点和本次会议预期成果",',
+        '  "priorityQuestions": ["2-5条优先追问，要针对客户背景和关注方向设计"],',
+        '  "materials": ["2-6项建议材料，要与客户关注方向匹配"],',
+        '  "riskReminders": ["1-3条补充风险提醒，要结合会议类型和客户情况"]',
+        '}',
+        '',
+        '要求：建议必须结合客户信息，不能删除或改写 SOP 必做项和边界。'
       ].join('\n')
     }
   ];
+}
+
+// 分析客户上下文信息
+function analyzeCustomerContext(session) {
+  const parts = [];
+
+  // 分析参会对象
+  const attendees = session.selections?.attendees;
+  if (attendees?.length) {
+    parts.push(`参会对象：${attendees.join('、')}`);
+    if (attendees.includes('管理层')) {
+      parts.push('  → 建议准备高层汇报材料，突出战略价值和投资回报');
+    }
+    if (attendees.includes('信息化人员')) {
+      parts.push('  → 建议准备技术架构和集成方案');
+    }
+    if (attendees.includes('实际使用者')) {
+      parts.push('  → 建议准备操作演示和用户体验案例');
+    }
+  }
+
+  // 分析关注方向
+  const focus = session.selections?.focus;
+  if (focus?.length) {
+    parts.push(`客户关注方向：${focus.join('、')}`);
+    if (focus.includes('AI 应用')) {
+      parts.push('  → 建议准备 AI 场景案例和效果数据');
+    }
+    if (focus.includes('行业案例')) {
+      parts.push('  → 建议准备同行业成功案例');
+    }
+    if (focus.includes('业务数字化')) {
+      parts.push('  → 建议准备数字化转型路径和价值分析');
+    }
+  }
+
+  // 分析发起背景
+  const background = session.selections?.background;
+  if (background?.length) {
+    parts.push(`会议发起背景：${background.join('、')}`);
+  }
+
+  // 分析我方角色
+  const roles = session.selections?.roles;
+  if (roles?.length) {
+    parts.push(`我方角色分工：${roles.join('、')}`);
+  }
+
+  return parts.length ? parts.join('\n') : '暂无详细客户信息';
 }
 
 function readBinaryBody(request, maxBytes) {
