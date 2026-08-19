@@ -197,25 +197,7 @@ npm test  # 167 tests, 0 failures, ~10s
 
 ---
 
-## 🔐 安全与部署建议
-
-| 层面 | 现状 | 生产建议 |
-|------|------|----------|
-| **鉴权** | 无（仅 Loopback 保护写入） | 加反向代理 + 基础 Auth（API Key / 简单登录 / IP 白名单） |
-| **HTTPS** | 无 | Caddy/Nginx 终结 TLS（自动 Let's Encrypt） |
-| **进程管理** | 手动 `npm start` | PM2 / systemd / Docker |
-| **数据持久化** | 本地文件 | SQLite/PostgreSQL + 定时备份 |
-| **可观测性** | 无 | 结构化日志 + 指标（请求量/延迟/错误率） |
-
-**最小生产化（2 人·天）**：
-1. Caddy 反向代理 + 自动 HTTPS（5 分钟）
-2. 简单 API Key 中间件（30 分钟）
-3. PM2 守护进程（10 分钟）
-4. SQLite 迁移客户/作品集数据（半天）
-
----
-
-## 📄 许可证
+##  许可证
 
 MIT License — 可自由用于学习、演示、二次开发。
 
