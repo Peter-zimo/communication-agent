@@ -41,21 +41,24 @@ test('mapModelError returns readable Chinese timeout and connection messages', (
   timeout.name = 'AbortError';
   assert.deepEqual(mapModelError(timeout), {
     errorType: 'timeout',
-    errorMessage: '模型超过等待时间未返回结果。请稍后重试，或将 MODEL_TIMEOUT_MS 调大后重启服务。'
+    errorMessage: '模型响应超时（超过90秒）。',
+    solution: '请稍后重试，或简化输入内容。如需调整超时时间，设置 MODEL_TIMEOUT_MS 环境变量后重启服务。'
   });
 
   const unreachable = new TypeError('fetch failed');
   unreachable.cause = { code: 'ECONNREFUSED' };
   assert.deepEqual(mapModelError(unreachable), {
     errorType: 'unreachable',
-    errorMessage: '模型服务不可达或网络不可达。请检查模型地址、端口和内网连接。'
+    errorMessage: '模型服务不可达或网络不可达。',
+    solution: '请检查 MODEL_BASE_URL 地址、端口和网络连接。'
   });
 
   const missingKey = new Error('未配置 DeepSeek API Key。');
   missingKey.code = 'MISSING_MODEL_API_KEY';
   assert.deepEqual(mapModelError(missingKey), {
     errorType: 'model_not_configured',
-    errorMessage: '未配置 DeepSeek API Key。请设置 DEEPSEEK_API_KEY 后重启服务。'
+    errorMessage: '未配置 DeepSeek API Key。',
+    solution: '请在 PowerShell 中运行：$env:DEEPSEEK_API_KEY = "你的密钥"，然后重启服务。'
   });
 });
 

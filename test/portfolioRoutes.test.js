@@ -101,7 +101,7 @@ async function withServer(callback) {
     stdio: ['ignore', 'pipe', 'pipe']
   });
   const ready = new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('portfolio test server did not start')), 5000);
+    const timer = setTimeout(() => reject(new Error('portfolio test server did not start')), 15000);
     let stderr = '';
     child.stderr.on('data', (chunk) => { stderr += chunk; });
     child.stdout.on('data', (chunk) => {

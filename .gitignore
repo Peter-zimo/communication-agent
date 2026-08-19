@@ -7,3 +7,5 @@ coverage/
 *.log
 portfolio-data/
 public/presales-agent-demo.mp4
+test-output*.txt
+data/

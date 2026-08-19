@@ -25,7 +25,8 @@ test('model stream supports an external cancellation signal', async () => {
     await assert.rejects(request, (error) => error.code === 'REQUEST_ABORTED');
     assert.deepEqual(mapModelError({ code: 'REQUEST_ABORTED' }), {
       errorType: 'cancelled',
-      errorMessage: '已停止生成。'
+      errorMessage: '已停止生成。',
+      solution: '可重新点击生成按钮继续。'
     });
   } finally {
     globalThis.fetch = originalFetch;

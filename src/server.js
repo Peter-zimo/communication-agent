@@ -18,6 +18,7 @@ import { parseBattleCardProposal } from './battleCardProposal.js';
 import { cleanupPortfolioUpload, readPortfolioMultipart } from './portfolioMultipart.js';
 import { isLoopbackAddress, isPortfolioWriteRequest } from './portfolioNetwork.js';
 import { deleteUnusedMedia, publishProject, readPortfolioMediaLibrary, readPortfolioProjects, replaceProject, setProjectStatus, validateMediaPart, validateProjectInput } from './portfolioStore.js';
+import { listCustomers, readCustomerHistory } from './customerStore.js';
 
 const PORT = Number(process.env.PORT || 5173);
 const DEFAULT_SCENE_ID = 'customer_communication';
@@ -275,6 +276,20 @@ const server = createServer(async (request, response) => {
         if (isPortfolioStorageError(error)) return sendPortfolioStorageError(response);
         return sendJson(response, 400, { errorMessage: error?.message || '媒体删除请求不符合要求。' });
       }
+    }
+
+    // ─── 客户记忆 API ───
+    if (request.method === 'GET' && pathname === '/api/customers') {
+      const customers = await listCustomers();
+      return sendJson(response, 200, customers);
+    }
+
+    const customerHistoryMatch = pathname.match(/^\/api\/customers\/(.+)\/history$/);
+    if (request.method === 'GET' && customerHistoryMatch) {
+      const customerName = decodeURIComponent(customerHistoryMatch[1]);
+      const history = await readCustomerHistory(customerName);
+      if (!history) return sendJson(response, 404, { errorType: 'not_found', errorMessage: '未找到该客户的历史记录。' });
+      return sendJson(response, 200, history);
     }
 
     if (request.method === 'GET') {
